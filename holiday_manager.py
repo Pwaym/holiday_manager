@@ -86,7 +86,15 @@ class HolidayList:
         # Ask user if they want to get the weather
         # If yes, use your getWeather function and display results
 
-
+def exit():
+    exitchoice = input("Would you like to exit? [y/n]:")
+    if exitchoice == "y":
+        print("Goodbye!")
+        break
+    elif exitchoice == "n":
+        pass
+    else:
+        print("Invalid choice.")
 
 def main():
     # Large Pseudo Code steps
@@ -103,11 +111,25 @@ def main():
     
     
     while True:
-        print("Holiday Management\r\n------------------\r\nThere are x holidays stored in the system.\r\n")
-        print("Holiday Menu\r\n------------\r\n1. Add a Holiday\r\n2. Remove a Holiday\r\n3. Save Holiday List\r\n4. View Holidays\r\n5. Exit")
+        print("Holiday Management\r\n==================\r\nThere are x holidays stored in the system.\r\n")
+        print("Holiday Menu\r\n============\r\n1. Add a Holiday\r\n2. Remove a Holiday\r\n3. Save Holiday List\r\n4. View Holidays\r\n5. Exit")
         menuchoice = input("Please enter your choice [1-5]:")
-        if menuchoice == "1":
+        if menuchoice == "1": # Add a Holiday
             print("1 picked")
+        elif menuchoice == "2": # Remove a Holiday
+            print("2 picked")
+        elif menuchoice == "3": # Save Holiday list
+            print("3 picked")
+        elif menuchoice == "4": # View Holidays
+            print("4 picked")
+        elif menuchoice == "5": # Exit
+            print("Exit\r\n====\r\n")
+            if True:
+                print("Your changes will be lost.")
+                exit()
+            else:
+                exit()
+
 
 
 if __name__ == "__main__":

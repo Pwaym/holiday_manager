@@ -56,7 +56,8 @@ class HolidayList:
         # Remember, 2 previous years, current year, and 2  years into the future. You can scrape multiple years by adding year to the timeanddate URL. For example https://www.timeanddate.com/holidays/us/2022
         # Check to see if name and date of holiday is in innerHolidays array
         # Add non-duplicates to innerHolidays
-        # Handle any exceptions.     
+        # Handle any exceptions. 
+            
 
     def numHolidays():
         # Return the total number of holidays in innerHolidays
@@ -90,9 +91,9 @@ def exit():
     exitchoice = input("Would you like to exit? [y/n]:")
     if exitchoice == "y":
         print("Goodbye!")
-        break
+        return False
     elif exitchoice == "n":
-        pass
+        return True
     else:
         print("Invalid choice.")
 
@@ -110,9 +111,10 @@ def main():
     #    If they do wish to continue, keep the program going. 
     
     
-    while True:
-        print("Holiday Management\r\n==================\r\nThere are x holidays stored in the system.\r\n")
-        print("Holiday Menu\r\n============\r\n1. Add a Holiday\r\n2. Remove a Holiday\r\n3. Save Holiday List\r\n4. View Holidays\r\n5. Exit")
+    inapp = True
+    print("Holiday Management\r\n==================\r\nThere are x holidays stored in the system.")
+    while inapp:
+        print("\r\nHoliday Menu\r\n============\r\n1. Add a Holiday\r\n2. Remove a Holiday\r\n3. Save Holiday List\r\n4. View Holidays\r\n5. Exit")
         menuchoice = input("Please enter your choice [1-5]:")
         if menuchoice == "1": # Add a Holiday
             print("1 picked")
@@ -123,12 +125,14 @@ def main():
         elif menuchoice == "4": # View Holidays
             print("4 picked")
         elif menuchoice == "5": # Exit
-            print("Exit\r\n====\r\n")
+            print("\r\nExit\r\n====")
             if True:
                 print("Your changes will be lost.")
-                exit()
+                inapp = exit()
             else:
-                exit()
+                inapp = exit()
+        else:
+            print("Invalid input. Enter a number 1-5\r\n")
 
 
 

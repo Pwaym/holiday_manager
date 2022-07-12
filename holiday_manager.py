@@ -3,6 +3,7 @@ import json
 from bs4 import BeautifulSoup
 import requests
 from dataclasses import dataclass
+import config
 
 
 # -------------------------------------------
@@ -113,12 +114,14 @@ class HolidayList:
 
     def numHolidays(self):
         # Return the total number of holidays in innerHolidays
+        return len(self.innerHolidays)
     
     def filter_holidays_by_week(self,year, week_number):
         # Use a Lambda function to filter by week number and save this as holidays, use the filter on innerHolidays
         # Week number is part of the the Datetime object
         # Cast filter results as list
         # return your holidays
+
 
     def displayHolidaysInWeek(self,holidayList):
         # Use your filter_holidays_by_week to get list of holidays within a week as a parameter
@@ -165,6 +168,22 @@ def adding():
             print("Invalid date. Please try again.")
             date = input(f"Date for {name} (yyyy-mm-dd):")
 
+def saving():
+    print("\r\nSaving Holiday List")
+    print("===================")
+    choice = input("Would you like to save your changes? [y/n]:")
+    if choice == "y":
+        HolidayList.save_to_json(config.jsonsavedestination)
+        print("Success:\r\nYour changes have been saved.")
+        return False
+    elif choice == "n":
+        print("Canceled:\r\nHoliday list file save cancelled.")
+        return True
+    else:
+        print("Invalid choice.")
+
+
+
 def main():
     # Large Pseudo Code steps
     # -------------------------------------
@@ -180,24 +199,26 @@ def main():
     
     
     inapp = True
-    print("Holiday Management\r\n==================\r\nThere are x holidays stored in the system.")
+    print(f"Holiday Management\r\n==================\r\nThere are {HolidayList.numHolidays()} holidays stored in the system.")
     while inapp:
         print("\r\nHoliday Menu\r\n============\r\n1. Add a Holiday\r\n2. Remove a Holiday\r\n3. Save Holiday List\r\n4. View Holidays\r\n5. Exit")
         menuchoice = input("Please enter your choice [1-5]:")
         if menuchoice == "1": # Add a Holiday
             adding()
+            unsaved = True
         elif menuchoice == "2": # Remove a Holiday
             print("Remove a Holiday")
             print("================")
             name = input("Holiday:")
             date = input("Date (yyyy-mm-dd):")
             HolidayList.removeHoliday(name,date)
+            unsaved = True
         elif menuchoice == "3": # Save Holiday list
-            print("3 picked")
+            unsaved = saving()
         elif menuchoice == "4": # View Holidays
             print("4 picked")
         elif menuchoice == "5": # Exit
-            if True:
+            if unsaved:
                 print("Your changes will be lost.")
                 inapp = exit()
             else:

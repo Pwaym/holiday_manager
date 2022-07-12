@@ -16,7 +16,7 @@ class Holiday:
       
     def __init__(self,name, date):
         self.name = name
-        self.date = date        
+        self.date = datetime.strptime(date,"%Y-%m-%d")
     
     def __str__ (self):
         return f"{self.name} ({self.date})"
@@ -56,7 +56,7 @@ class HolidayList:
         # Find Holiday in innerHolidays by searching the name and date combination.
         # remove the Holiday from innerHolidays
         # inform user you deleted the holiday
-        delete = HolidayList.findHoliday(HolidayName, Date)
+        delete = self.findHoliday(HolidayName, Date)
         if delete == False:
             return print("Error:\r\nHoliday not found.")
         else:
@@ -70,7 +70,7 @@ class HolidayList:
         file = open(filelocation)
         jsonfile = json.loads(file.read())
         for holiday in jsonfile["holidays"]:
-            HolidayList.addHoliday(holiday)
+            self.addHoliday(holiday)
 
     def save_to_json(self,filelocation):
         # Write out json file to selected file.
@@ -101,7 +101,7 @@ class HolidayList:
                 holidaydict["date"] = year + " " + dates.string
                 holidaylist.append(holidaydict)
 
-        for x in holidaylist:
+        for x in holidaylist: #The first part here changes scraped month abbreviations to numeric months 
             x["date"] = datetime.strptime(x["date"],"%Y %b %d")
             x["date"] = datetime.strftime(x["date"],"%Y-%m-%d")
             
@@ -121,12 +121,26 @@ class HolidayList:
         # Week number is part of the the Datetime object
         # Cast filter results as list
         # return your holidays
+        if not isinstance(year,int):
+            return ValueError()
 
+        if not isinstance(week_number,int):
+            return ValueError()
+
+        holidays = list(filter(lambda holiday: holiday.date.isocalendar()[0] == year and holiday.date.isocalendar()[1] == week_number))
+        return holidays
+        
 
     def displayHolidaysInWeek(self,holidayList):
         # Use your filter_holidays_by_week to get list of holidays within a week as a parameter
         # Output formated holidays in the week. 
         # * Remember to use the holiday __str__ method.
+        if len(holidayList) == 0:
+            return print("\r\nThere are no holidays listed for this week!")
+        else:
+            year = holidayList[0].date.isocalendar()[0]
+            week = holidayList[0].date.isocalendar()[1]
+            return print(f"\r\nThese are the holidays for {year} week #{week}")
 
     # def getWeather(self,weekNum):
         # Convert weekNum to range between two days
@@ -141,6 +155,11 @@ class HolidayList:
         # Use your displayHolidaysInWeek function to display the holidays in the week
         # Ask user if they want to get the weather
         # If yes, use your getWeather function and display results
+        year = datetime.today().isocalendar()[0]
+        week = datetime.today().isocalendar()[1]
+        holist = self.filter_holidays_by_week(year,week)
+        display = self.displayHolidaysInWeek(holist)
+        return print(display)
 
 def exit():
     print("\r\nExit\r\n====")
@@ -182,6 +201,29 @@ def saving():
     else:
         print("Invalid choice.")
 
+def viewing():
+    print("View Holidays")
+    print("=============")
+    checking = True
+    while checking:
+        try:
+            year = int(input("Which year?:"))
+            week = int(input("Which week? #[1-53, leave blank for the current week]:"))
+            if week != "":
+                if week >= 1 and week <= 53:
+                    display = HolidayList.displayHolidaysInWeek(HolidayList.filter_holidays_by_week(year,week))
+                    print(display)
+                    checking = False
+                else:
+                    print("Week is out of range [1-53]")
+                    checking = True
+            else:
+                HolidayList.viewCurrentWeek()
+        except:
+            print("Error occured: Inputs must be an integer.")
+            checking = True
+
+
 
 
 def main():
@@ -196,7 +238,9 @@ def main():
     # 6. Run appropriate method from the HolidayList object depending on what the user input is
     # 7. Ask the User if they would like to Continue, if not, end the while loop, ending the program. 
     #    If they do wish to continue, keep the program going. 
-    
+    HolidayList()
+    HolidayList.read_json(config.jsonreaddestination)
+    HolidayList.scrapeHolidays()
     
     inapp = True
     print(f"Holiday Management\r\n==================\r\nThere are {HolidayList.numHolidays()} holidays stored in the system.")
@@ -216,7 +260,7 @@ def main():
         elif menuchoice == "3": # Save Holiday list
             unsaved = saving()
         elif menuchoice == "4": # View Holidays
-            print("4 picked")
+            viewing()
         elif menuchoice == "5": # Exit
             if unsaved:
                 print("Your changes will be lost.")
@@ -229,7 +273,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main();
+    main()
 
 
 # Additional Hints:

@@ -19,7 +19,8 @@ class Holiday:
         self.date = datetime.strptime(date,"%Y-%m-%d")
     
     def __str__ (self):
-        return f"{self.name} ({self.date})"
+        date = datetime.strftime(self.date,"%Y-%m-%d")
+        return f"{self.name} ({date})"
           
            
 # -------------------------------------------
@@ -35,18 +36,17 @@ class HolidayList:
         # Make sure holidayObj is an Holiday Object by checking the type
         # Use innerHolidays.append(holidayObj) to add holiday
         # print to the user that you added a holiday
-        objtype = type(holidayObj)
-        if objtype == "__main__.Holiday":
+        if isinstance(holidayObj,Holiday):
             self.innerHolidays.append(holidayObj)
             print(f"Success:\r\n{holidayObj} has been added to the holiday list.")
         else:
-            print("Invalid input.\r\n")
+            print(type(holidayObj),"Invalid input.\r\n")
 
     def findHoliday(self,HolidayName, Date):
         # Find Holiday in innerHolidays
         # Return Holiday
         for holiday in self.innerHolidays:
-            if holiday["name"] == HolidayName and holiday["date"] == Date:
+            if holiday.name == HolidayName and holiday.date == Date:
                 return holiday
             else:
                 pass
@@ -70,12 +70,19 @@ class HolidayList:
         file = open(filelocation)
         jsonfile = json.loads(file.read())
         for holiday in jsonfile["holidays"]:
-            self.addHoliday(holiday)
+            name = holiday["name"]
+            date = holiday["date"]
+            self.addHoliday(Holiday(name,date))
 
     def save_to_json(self,filelocation):
         # Write out json file to selected file.
         file = open(filelocation, "w")
-        json.dump(self.innerHolidays,file)
+        holidaydicts = []
+        for holiday in self.innerHolidays:
+            holidaydict = holiday.__dict__
+            holidaydict["date"] = datetime.strftime(holidaydict["date"],"%Y-%m-%d")
+            holidaydicts.append(holidaydict)
+        json.dump(holidaydicts,file)
         
     def scrapeHolidays(self):
         # Scrape Holidays from https://www.timeanddate.com/holidays/us/ 
@@ -106,10 +113,13 @@ class HolidayList:
             x["date"] = datetime.strftime(x["date"],"%Y-%m-%d")
             
             for item in self.innerHolidays:
-                if x["name"] == item["name"] and x["date"] == item["date"]:
+                if x["name"] == item.name and x["date"] == item.date:
                     holidaylist.remove(x)
                 else:
-                    self.innerHolidays.append(x)
+                    pass
+            name = x["name"]
+            date = x["date"]
+            self.addHoliday(Holiday(name,date))
             
 
     def numHolidays(self):
@@ -127,7 +137,7 @@ class HolidayList:
         if not isinstance(week_number,int):
             return ValueError()
 
-        holidays = list(filter(lambda holiday: holiday.date.isocalendar()[0] == year and holiday.date.isocalendar()[1] == week_number))
+        holidays = list(filter(lambda holiday: holiday.date.isocalendar()[0] == year and holiday.date.isocalendar()[1] == week_number, self.innerHolidays))
         return holidays
         
 
@@ -140,7 +150,9 @@ class HolidayList:
         else:
             year = holidayList[0].date.isocalendar()[0]
             week = holidayList[0].date.isocalendar()[1]
-            return print(f"\r\nThese are the holidays for {year} week #{week}")
+            print(f"\r\nThese are the holidays for {year} week #{week}")
+            for i in holidayList:
+                print(i)
 
     # def getWeather(self,weekNum):
         # Convert weekNum to range between two days
@@ -162,7 +174,6 @@ class HolidayList:
         return print(display)
 
 def exit():
-    print("\r\nExit\r\n====")
     exitchoice = input("Would you like to exit? [y/n]:")
     if exitchoice == "y":
         print("Goodbye!")
@@ -172,7 +183,7 @@ def exit():
     else:
         print("Invalid choice.")
 
-def adding():
+def adding(holidaylist):
     print("\r\nAdd a Holiday")
     print("=============")
     name = input("Holiday:")
@@ -181,18 +192,18 @@ def adding():
     while checking == True:
         if len(date) == 10:
             newholiday = Holiday(name,date)
-            HolidayList.addHoliday(newholiday)
+            holidaylist.addHoliday(newholiday)
             checking = False
         else:
             print("Invalid date. Please try again.")
             date = input(f"Date for {name} (yyyy-mm-dd):")
 
-def saving():
+def saving(holidaylist):
     print("\r\nSaving Holiday List")
     print("===================")
     choice = input("Would you like to save your changes? [y/n]:")
     if choice == "y":
-        HolidayList.save_to_json(config.jsonsavedestination)
+        holidaylist.save_to_json(config.jsonsavedestination)
         print("Success:\r\nYour changes have been saved.")
         return False
     elif choice == "n":
@@ -201,27 +212,27 @@ def saving():
     else:
         print("Invalid choice.")
 
-def viewing():
+def viewing(holidaylist):
     print("View Holidays")
     print("=============")
     checking = True
     while checking:
-        try:
-            year = int(input("Which year?:"))
-            week = int(input("Which week? #[1-53, leave blank for the current week]:"))
-            if week != "":
-                if week >= 1 and week <= 53:
-                    display = HolidayList.displayHolidaysInWeek(HolidayList.filter_holidays_by_week(year,week))
-                    print(display)
-                    checking = False
-                else:
-                    print("Week is out of range [1-53]")
-                    checking = True
+        #try:
+        year = int(input("Which year?:"))
+        week = int(input("Which week? #[1-53, leave blank for the current week]:"))
+        if week != "":
+            if week >= 1 and week <= 53:
+                display = holidaylist.displayHolidaysInWeek(holidaylist.filter_holidays_by_week(year,week))
+                print(display)
+                checking = False
             else:
-                HolidayList.viewCurrentWeek()
-        except:
-            print("Error occured: Inputs must be an integer.")
-            checking = True
+                print("Week is out of range [1-53]")
+                checking = True
+        else:
+            holidaylist.viewCurrentWeek()
+        # except:
+        #     print("Error occured: Inputs must be an integer.")
+        #     checking = True
 
 
 
@@ -238,30 +249,32 @@ def main():
     # 6. Run appropriate method from the HolidayList object depending on what the user input is
     # 7. Ask the User if they would like to Continue, if not, end the while loop, ending the program. 
     #    If they do wish to continue, keep the program going. 
-    HolidayList()
-    HolidayList.read_json(config.jsonreaddestination)
-    HolidayList.scrapeHolidays()
+    holidaylist = HolidayList()
+    holidaylist.read_json(config.jsonreaddestination)
+    holidaylist.scrapeHolidays()
     
     inapp = True
-    print(f"Holiday Management\r\n==================\r\nThere are {HolidayList.numHolidays()} holidays stored in the system.")
+    unsaved = False
+    print(f"Holiday Management\r\n==================\r\nThere are {holidaylist.numHolidays()} holidays stored in the system.")
     while inapp:
         print("\r\nHoliday Menu\r\n============\r\n1. Add a Holiday\r\n2. Remove a Holiday\r\n3. Save Holiday List\r\n4. View Holidays\r\n5. Exit")
         menuchoice = input("Please enter your choice [1-5]:")
         if menuchoice == "1": # Add a Holiday
-            adding()
+            adding(holidaylist)
             unsaved = True
         elif menuchoice == "2": # Remove a Holiday
             print("Remove a Holiday")
             print("================")
             name = input("Holiday:")
             date = input("Date (yyyy-mm-dd):")
-            HolidayList.removeHoliday(name,date)
+            holidaylist.removeHoliday(name,date)
             unsaved = True
         elif menuchoice == "3": # Save Holiday list
-            unsaved = saving()
+            unsaved = saving(holidaylist)
         elif menuchoice == "4": # View Holidays
-            viewing()
+            viewing(holidaylist)
         elif menuchoice == "5": # Exit
+            print("\r\nExit\r\n====")
             if unsaved:
                 print("Your changes will be lost.")
                 inapp = exit()
